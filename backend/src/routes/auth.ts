@@ -7,33 +7,35 @@ import { config } from '@/config/environment';
 import { AppError } from '@/utils/appError';
 import { authenticate } from '@/middleware/auth';
 import { validate } from '@/middleware/validate';
+import { cleanRegistrationBody } from '@/middleware/cleanBody';
 
 const router = Router();
 
 // Register
 router.post('/register', [
+  cleanRegistrationBody,
   body('email').isEmail().normalizeEmail(),
-  body('username').isLength({ min: 3, max: 20 }).trim(),
   body('firstName').isLength({ min: 1, max: 50 }).trim(),
   body('lastName').isLength({ min: 1, max: 50 }).trim(),
   body('password').isLength({ min: 6 }),
-  body('role').isIn(['STUDENT', 'TEACHER']).optional(),
+  body('userType').isIn(['student', 'teacher']),
   validate
 ], async (req: Request, res: Response) => {
-  const { email, username, firstName, lastName, password, role = 'STUDENT' } = req.body;
+  const { email, firstName, lastName, password, userType } = req.body;
+
+  // Generate username from email if not provided
+  const username = email.split('@')[0] + '_' + Date.now().toString().slice(-4);
+  
+  // Convert userType to role for database
+  const role = userType.toUpperCase(); // 'student' -> 'STUDENT', 'teacher' -> 'TEACHER'
 
   // Check if user already exists
-  const existingUser = await prisma.user.findFirst({
-    where: {
-      OR: [
-        { email },
-        { username }
-      ]
-    }
+  const existingUser = await prisma.user.findUnique({
+    where: { email }
   });
 
   if (existingUser) {
-    throw new AppError('Email or username already exists', 400);
+    throw new AppError('Email already exists', 400);
   }
 
   // Hash password
@@ -78,12 +80,16 @@ router.post('/register', [
     { expiresIn: config.jwtExpiresIn } as jwt.SignOptions
   );
 
+  // Transform user data for frontend
+  const userData = {
+    ...user,
+    userType: user.role.toLowerCase() // Convert 'STUDENT' to 'student', 'TEACHER' to 'teacher'
+  };
+
   res.status(201).json({
     status: 'success',
-    data: {
-      user,
-      token
-    }
+    token,
+    user: userData
   });
 });
 
@@ -121,15 +127,17 @@ router.post('/login', [
     { expiresIn: config.jwtExpiresIn } as jwt.SignOptions
   );
 
-  // Remove password from response
+  // Remove password from response and transform for frontend
   const { password: _, ...userWithoutPassword } = user;
+  const userData = {
+    ...userWithoutPassword,
+    userType: user.role.toLowerCase() // Convert 'STUDENT' to 'student', 'TEACHER' to 'teacher'
+  };
 
   res.json({
     status: 'success',
-    data: {
-      user: userWithoutPassword,
-      token
-    }
+    token,
+    user: userData
   });
 });
 
@@ -151,9 +159,19 @@ router.get('/me', authenticate, async (req: Request, res: Response) => {
     }
   });
 
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+
+  // Transform for frontend
+  const userData = {
+    ...user,
+    userType: user.role.toLowerCase()
+  };
+
   res.json({
     status: 'success',
-    data: { user }
+    data: userData
   });
 });
 

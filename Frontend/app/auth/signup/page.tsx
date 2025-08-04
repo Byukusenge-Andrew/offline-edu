@@ -14,13 +14,14 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { BookOpen, Eye, EyeOff, User, GraduationCap, ArrowLeft, AlertCircle, Loader2, CheckCircle } from "lucide-react"
 import Link from "next/link"
+import { useAuth } from "@/contexts/auth-context"
 
 export default function SignupPage() {
+  const { signup, error: authError, isLoading: authLoading } = useAuth()
   const router = useRouter()
   const [userType, setUserType] = useState<"student" | "teacher">("student")
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState({
@@ -28,7 +29,6 @@ export default function SignupPage() {
     firstName: "",
     lastName: "",
     email: "",
-    username: "",
     password: "",
     confirmPassword: "",
     // Profile Info
@@ -43,7 +43,7 @@ export default function SignupPage() {
   })
 
   const validateStep1 = () => {
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.username) {
+    if (!formData.firstName || !formData.lastName || !formData.email) {
       setError("Please fill in all required fields")
       return false
     }
@@ -90,22 +90,19 @@ export default function SignupPage() {
       return
     }
 
-    setIsLoading(true)
     setError("")
 
-    // Simulate account creation
-    setTimeout(() => {
-      localStorage.setItem("username", formData.username)
-      localStorage.setItem("userType", userType)
-      localStorage.setItem("isAuthenticated", "true")
-
-      if (userType === "student") {
-        router.push("/student/dashboard")
-      } else {
-        router.push("/teacher/dashboard")
-      }
-      setIsLoading(false)
-    }, 2000)
+    try {
+      await signup({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        userType: userType,
+      })
+    } catch (error: any) {
+      setError(error.message)
+    }
   }
 
   const subjects = [
@@ -122,8 +119,8 @@ export default function SignupPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50  p-4 ml-96 sm:mx-auto">
+      <div className="w-full  ">
         <div className="mb-8 text-center">
           <Link href="/" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-4">
             <ArrowLeft className="h-4 w-4" />
@@ -194,17 +191,6 @@ export default function SignupPage() {
                       placeholder="john.doe@example.com"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="username">Username *</Label>
-                    <Input
-                      id="username"
-                      placeholder="johndoe123"
-                      value={formData.username}
-                      onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                       required
                     />
                   </div>
@@ -368,9 +354,6 @@ export default function SignupPage() {
                         <strong>Email:</strong> {formData.email}
                       </p>
                       <p>
-                        <strong>Username:</strong> {formData.username}
-                      </p>
-                      <p>
                         <strong>Account Type:</strong> {userType === "student" ? "Student" : "Teacher"}
                       </p>
                       {userType === "student" && formData.grade && (
@@ -431,10 +414,10 @@ export default function SignupPage() {
                 </div>
               )}
 
-              {error && (
+              {(error || authError) && (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{error}</AlertDescription>
+                  <AlertDescription>{error || authError}</AlertDescription>
                 </Alert>
               )}
 
@@ -460,9 +443,9 @@ export default function SignupPage() {
                     className={`flex-1 ${
                       userType === "student" ? "bg-blue-600 hover:bg-blue-700" : "bg-purple-600 hover:bg-purple-700"
                     }`}
-                    disabled={isLoading}
+                    disabled={authLoading}
                   >
-                    {isLoading ? (
+                    {authLoading ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                         Creating Account...

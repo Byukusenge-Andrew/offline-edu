@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -23,6 +23,7 @@ import {
   ArrowRight,
   User,
   GraduationCap,
+  Lock,
 } from "lucide-react"
 import Link from "next/link"
 
@@ -31,6 +32,25 @@ export default function HomePage() {
   const [password, setPassword] = useState("")
   const [userType, setUserType] = useState<"student" | "teacher">("student")
   const router = useRouter()
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (videoRef.current) {
+        if (document.hidden) {
+          videoRef.current.pause()
+        } else {
+          videoRef.current.play()
+        }
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+    }
+  }, [])
 
   const handleLogin = () => {
     if (username.trim()) {
@@ -45,6 +65,12 @@ export default function HomePage() {
       title: "Offline-First Learning",
       description: "Access all content without internet connection",
       color: "text-blue-600",
+    },
+    {
+      icon: Lock,
+      title: "Blockchain-Verified Certificates",
+      description: "Secure, tamper-proof credentials for your achievements",
+      color: "text-teal-600",
     },
     {
       icon: Brain,
@@ -112,148 +138,62 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10" />
-        <div className="relative max-w-7xl mx-auto px-4 py-16">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Hero Content */}
-            <div className="space-y-8">
-              <div className="space-y-4">
-                <Badge className="bg-blue-100 text-blue-800 border-blue-200">🚀 AI-Powered Education Platform</Badge>
-                <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                  Learn Anywhere,
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-                    {" "}
-                    Anytime
-                  </span>
-                </h1>
-                <p className="text-xl text-gray-600 leading-relaxed">
-                  Revolutionary offline-first educational platform with AI assistance, designed specifically for African
-                  students and teachers.
-                </p>
-              </div>
+      <div className="relative h-screen overflow-hidden">
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          playsInline
+          className="absolute z-0 w-full h-full object-cover"
+        >
+          <source src="/In_areas_with_limited_V1.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+        <div className="absolute inset-0 bg-black/50" />
+        <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-4">
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <Badge className="bg-white/20 text-white border-white/30">🚀 AI-Powered Education Platform</Badge>
+              <h1 className="text-4xl lg:text-7xl font-bold leading-tight">
+                Learn Anywhere, Anytime
+              </h1>
+              <p className="text-xl lg:text-2xl text-white/80 leading-relaxed max-w-3xl mx-auto">
+                Revolutionary offline-first educational platform with AI assistance, designed specifically for African
+                students and teachers.
+              </p>
+            </div>
 
-              <div className="flex flex-wrap gap-4">
-                <div className="flex items-center gap-2 text-green-600">
-                  <CheckCircle className="h-5 w-5" />
-                  <span className="font-medium">100% Offline Capable</span>
-                </div>
-                <div className="flex items-center gap-2 text-purple-600">
-                  <CheckCircle className="h-5 w-5" />
-                  <span className="font-medium">AI-Powered Learning</span>
-                </div>
-                <div className="flex items-center gap-2 text-blue-600">
-                  <CheckCircle className="h-5 w-5" />
-                  <span className="font-medium">Teacher Supervised</span>
-                </div>
+            <div className="flex flex-wrap justify-center gap-4">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-400" />
+                <span className="font-medium">100% Offline Capable</span>
               </div>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                >
-                  <Play className="h-5 w-5 mr-2" />
-                  Watch Demo
-                </Button>
-                <Button size="lg" variant="outline">
-                  Learn More
-                  <ArrowRight className="h-5 w-5 ml-2" />
-                </Button>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-purple-400" />
+                <span className="font-medium">AI-Powered Learning</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-blue-400" />
+                <span className="font-medium">Teacher Supervised</span>
               </div>
             </div>
 
-            {/* Login Card */}
-            <div className="lg:justify-self-end">
-              <Card className="w-full max-w-md shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
-                <CardHeader className="text-center">
-                  <div className="mx-auto w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center mb-4">
-                    <BookOpen className="h-6 w-6 text-white" />
-                  </div>
-                  <CardTitle className="text-2xl">Welcome to OfflineEdu</CardTitle>
-                  <CardDescription>Sign in to start your learning journey</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <Tabs value={userType} onValueChange={(value) => setUserType(value as "student" | "teacher")}>
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="student" className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        Student
-                      </TabsTrigger>
-                      <TabsTrigger value="teacher" className="flex items-center gap-2">
-                        <GraduationCap className="h-4 w-4" />
-                        Teacher
-                      </TabsTrigger>
-                    </TabsList>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/auth/signup">
+                <Button
+                  size="lg"
+                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
 
-                    <TabsContent value="student" className="space-y-4 mt-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="student-username">Username</Label>
-                        <Input
-                          id="student-username"
-                          placeholder="Enter your username"
-                          value={username}
-                          onChange={(e) => setUsername(e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="student-password">Password</Label>
-                        <Input
-                          id="student-password"
-                          type="password"
-                          placeholder="Enter your password"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                        />
-                      </div>
-                      <Button
-                        onClick={() => router.push("/auth/login")}
-                        className="w-full bg-blue-600 hover:bg-blue-700"
-                      >
-                        Sign In as Student
-                      </Button>
-                    </TabsContent>
-
-                    <TabsContent value="teacher" className="space-y-4 mt-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="teacher-username">Username</Label>
-                        <Input
-                          id="teacher-username"
-                          placeholder="Enter your username"
-                          value={username}
-                          onChange={(e) => setUsername(e.target.value)}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="teacher-password">Password</Label>
-                        <Input
-                          id="teacher-password"
-                          type="password"
-                          placeholder="Enter your password"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                        />
-                      </div>
-                      <Button
-                        onClick={() => router.push("/auth/login")}
-                        className="w-full bg-purple-600 hover:bg-purple-700"
-                      >
-                        Sign In as Teacher
-                      </Button>
-                    </TabsContent>
-                  </Tabs>
-
-                  <div className="text-center">
-                    <p className="text-sm text-gray-600">
-                      Don't have an account?{" "}
-                      <Link href="/auth/signup" className="text-blue-600 hover:underline font-medium">
-                        Sign up here
-                      </Link>
-                    </p>
-                    <p className="text-sm text-gray-600 mt-2">Demo credentials: Use any username to explore</p>
-                  </div>
-                </CardContent>
-              </Card>
+                >
+                  Get Started for Free
+                </Button>
+              </Link>
+              <Link href="/auth/login">
+                <Button size="lg" variant="outline" className="text-black" >
+                  Login
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

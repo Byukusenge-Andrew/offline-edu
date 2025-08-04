@@ -42,14 +42,14 @@ import {
 import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
+import { useAuth } from "@/contexts/auth-context"
 
 interface UniversalNavbarProps {
   variant?: "public" | "authenticated"
 }
 
-export default function UniversalNavbar({ variant = "public" }: UniversalNavbarProps) {
-  const [username, setUsername] = useState("")
-  const [userType, setUserType] = useState<"student" | "teacher" | null>(null)
+export default function UniversalNavbar({ variant: initialVariant = "public" }: UniversalNavbarProps) {
+  const {   user, logout, isAuthenticated } = useAuth()
   const [batteryLevel, setBatteryLevel] = useState(85)
   const [isOnline, setIsOnline] = useState(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -57,15 +57,10 @@ export default function UniversalNavbar({ variant = "public" }: UniversalNavbarP
 
   const router = useRouter()
   const pathname = usePathname()
+  const variant = isAuthenticated ? "authenticated" : "public"
 
   useEffect(() => {
     if (variant === "authenticated") {
-      const storedUsername = localStorage.getItem("username")
-      const storedUserType = localStorage.getItem("userType") as "student" | "teacher"
-
-      if (storedUsername) setUsername(storedUsername)
-      if (storedUserType) setUserType(storedUserType)
-
       // Simulate battery drain
       const interval = setInterval(() => {
         setBatteryLevel((prev) => Math.max(20, prev - Math.random() * 2))
@@ -87,9 +82,7 @@ export default function UniversalNavbar({ variant = "public" }: UniversalNavbarP
   }, [variant])
 
   const handleLogout = () => {
-    localStorage.removeItem("username")
-    localStorage.removeItem("userType")
-    router.push("/")
+    logout()
   }
 
   const isActivePath = (path: string) => {
@@ -127,7 +120,7 @@ export default function UniversalNavbar({ variant = "public" }: UniversalNavbarP
   ]
 
   const authenticatedNavItems =
-    userType === "student"
+    user?.userType === "student"
       ? [
           { title: "Dashboard", href: "/student/dashboard", icon: Home },
           { title: "Subjects", href: "/student/subjects", icon: BookOpen },
@@ -240,18 +233,18 @@ export default function UniversalNavbar({ variant = "public" }: UniversalNavbarP
             )}
 
             {/* User Menu or Auth Buttons */}
-            {variant === "authenticated" ? (
+            {variant === "authenticated" && user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center space-x-2 px-2">
                     <Avatar className="h-7 w-7">
                       <AvatarFallback className="text-xs">
-                        {username ? username.charAt(0).toUpperCase() : "U"}
+                        {user.username ? user.username.charAt(0).toUpperCase() : "U"}
                       </AvatarFallback>
                     </Avatar>
                     <div className="hidden md:block text-left">
-                      <p className="text-sm font-medium">{username || "User"}</p>
-                      <p className="text-xs text-muted-foreground capitalize">{userType}</p>
+                      <p className="text-sm font-medium">{user.username || "User"}</p>
+                      <p className="text-xs text-muted-foreground capitalize">{user.userType}</p>
                     </div>
                     <ChevronDown className="h-3 w-3" />
                   </Button>
@@ -260,7 +253,7 @@ export default function UniversalNavbar({ variant = "public" }: UniversalNavbarP
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href={`/${userType}/profile`}>
+                    <Link href={`/${user.userType}/profile`}>
                       <User className="h-4 w-4 mr-2" />
                       Profile
                     </Link>
@@ -345,76 +338,78 @@ export default function UniversalNavbar({ variant = "public" }: UniversalNavbarP
                       </div>
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      {/* Mobile Status */}
-                      <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                        <div className="flex items-center space-x-2">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback>{username?.charAt(0).toUpperCase()}</AvatarFallback>
-                          </Avatar>
+                    user && (
+                      <div className="space-y-2">
+                        {/* Mobile Status */}
+                        <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                          <div className="flex items-center space-x-2">
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback>{user.username?.charAt(0).toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                          </div>
                           <div>
-                            <p className="font-medium text-sm">{username}</p>
-                            <p className="text-xs text-muted-foreground capitalize">{userType}</p>
+                            <p className="font-medium text-sm">{user.username}</p>
+                            <p className="text-xs text-muted-foreground capitalize">{user.userType}</p>
+                          </div>
+                          <div className="flex space-x-1">
+                            <Badge variant="outline" className="text-xs">
+                              <Brain className="h-3 w-3" />
+                            </Badge>
+                            <Badge variant={isOnline ? "outline" : "destructive"} className="text-xs">
+                              {isOnline ? <Globe className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
+                            </Badge>
                           </div>
                         </div>
-                        <div className="flex space-x-1">
-                          <Badge variant="outline" className="text-xs">
-                            <Brain className="h-3 w-3" />
-                          </Badge>
-                          <Badge variant={isOnline ? "outline" : "destructive"} className="text-xs">
-                            {isOnline ? <Globe className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
-                          </Badge>
+
+                        {/* Mobile Nav Items */}
+                        <div className="space-y-1">
+                          {authenticatedNavItems.map((item) => (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              onClick={() => setMobileMenuOpen(false)}
+                              className={cn(
+                                "flex items-center space-x-3 p-3 rounded-lg transition-colors",
+                                isActivePath(item.href) ? "bg-primary text-primary-foreground" : "hover:bg-accent",
+                              )}
+                            >
+                              <item.icon className="h-4 w-4" />
+                              <span className="font-medium">{item.title}</span>
+                            </Link>
+                          ))}
+                        </div>
+
+                        {/* Mobile Footer */}
+                        <div className="pt-4 border-t space-y-1">
+                          <Link
+                            href={`/${user.userType}/profile`}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent transition-colors"
+                          >
+                            <User className="h-4 w-4" />
+                            <span>Profile</span>
+                          </Link>
+                          <Link
+                            href="/help"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent transition-colors"
+                          >
+                            <HelpCircle className="h-4 w-4" />
+                            <span>Help & Support</span>
+                          </Link>
+                          <button
+                            onClick={() => {
+                              handleLogout()
+                              setMobileMenuOpen(false)
+                            }}
+                            className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent transition-colors text-red-600 w-full text-left"
+                          >
+                            <LogOut className="h-4 w-4" />
+                            <span>Sign Out</span>
+                          </button>
                         </div>
                       </div>
-
-                      {/* Mobile Nav Items */}
-                      <div className="space-y-1">
-                        {authenticatedNavItems.map((item) => (
-                          <Link
-                            key={item.href}
-                            href={item.href}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className={cn(
-                              "flex items-center space-x-3 p-3 rounded-lg transition-colors",
-                              isActivePath(item.href) ? "bg-primary text-primary-foreground" : "hover:bg-accent",
-                            )}
-                          >
-                            <item.icon className="h-4 w-4" />
-                            <span className="font-medium">{item.title}</span>
-                          </Link>
-                        ))}
-                      </div>
-
-                      {/* Mobile Footer */}
-                      <div className="pt-4 border-t space-y-1">
-                        <Link
-                          href={`/${userType}/profile`}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent transition-colors"
-                        >
-                          <User className="h-4 w-4" />
-                          <span>Profile</span>
-                        </Link>
-                        <Link
-                          href="/help"
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent transition-colors"
-                        >
-                          <HelpCircle className="h-4 w-4" />
-                          <span>Help & Support</span>
-                        </Link>
-                        <button
-                          onClick={() => {
-                            handleLogout()
-                            setMobileMenuOpen(false)
-                          }}
-                          className="flex items-center space-x-3 p-3 rounded-lg hover:bg-accent transition-colors text-red-600 w-full text-left"
-                        >
-                          <LogOut className="h-4 w-4" />
-                          <span>Sign Out</span>
-                        </button>
-                      </div>
-                    </div>
+                    )
                   )}
                 </div>
               </SheetContent>
