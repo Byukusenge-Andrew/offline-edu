@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1432954a-3246-4178-86c6-f2656e1ca176" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Frontend/app/auth/login/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/app/auth/login/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/app/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/app/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/Frontend/package.json" afterDir="false" />
-    </list>
+    <list default="true" id="1432954a-3246-4178-86c6-f2656e1ca176" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -78,7 +73,11 @@
       <option name="presentableId" value="Default" />
       <updated>1754293889638</updated>
       <workItem from="1754293894130" duration="30000" />
+      <workItem from="1754347103653" duration="41000" />
     </task>
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
 </project>
