@@ -1,0 +1,23 @@
+<svg width="300" height="100" viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Head silhouette with African continent -->
+  <g id="head">
+    <path d="M40,50 C40,30 60,20 70,30 C80,40 80,60 70,70 C60,80 40,70 40,50 Z" fill="#5C4033"/>
+    <!-- African continent shape (simplified) -->
+    <path d="M55,45 C56,43 58,42 60,44 C62,46 61,48 59,49 C57,50 55,48 55,45 Z" fill="#D2B48C"/>
+  </g>
+
+  <!-- Graduation cap -->
+  <g id="cap">
+    <rect x="45" y="25" width="30" height="10" fill="#002147" />
+    <line x1="60" y1="35" x2="60" y2="45" stroke="#002147" stroke-width="2" />
+    <circle cx="60" cy="45" r="2" fill="#002147" />
+  </g>
+
+  <!-- Text -->
+  <text x="100" y="45" font-family="Segoe UI, sans-serif" font-size="24" fill="#002147" font-weight="bold">
+    OfflineEdu
+  </text>
+  <text x="100" y="70" font-family="Segoe UI, sans-serif" font-size="14" fill="#8B5E3C">
+    AI-Powered Educational Platform
+  </text>
+</svg>

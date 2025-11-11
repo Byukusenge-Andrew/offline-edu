@@ -43,6 +43,7 @@ import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/contexts/auth-context"
+import Image from "next/image"
 
 interface UniversalNavbarProps {
   variant?: "public" | "authenticated"
@@ -142,10 +143,13 @@ export default function UniversalNavbar({ variant: initialVariant = "public" }: 
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
-              <BookOpen className="h-5 w-5 text-white" />
-            </div>
-            <span className="font-bold text-xl">OfflineEdu</span>
+           <Image
+           src={"/logo.png"}
+            alt="OfflineEdu Logo"
+            width={100}
+            height={64}
+            className="object-contain"
+           />
           </Link>
 
           {/* Desktop Navigation */}

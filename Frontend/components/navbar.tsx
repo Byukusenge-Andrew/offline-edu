@@ -29,6 +29,7 @@ import {
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 
 interface Notification {
   id: string
@@ -165,7 +166,15 @@ export default function Navbar() {
           <Link href={userType === "student" ? "/student/dashboard" : "/teacher/dashboard"}>
             <div className="flex items-center gap-2">
               <div className="p-2 bg-blue-600 rounded-lg">
-                <BookOpen className="h-5 w-5 text-white" />
+              <Image
+src={"/logo.png"}
+alt="OfflineEdu Logo"
+width={30}
+height={30}
+className="object-contain bg-transparent"
+
+
+/>
               </div>
               <div>
                 <h1 className="font-bold text-lg text-gray-900">OfflineEdu</h1>
