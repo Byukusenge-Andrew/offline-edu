@@ -389,4 +389,29 @@ export default function PrivacyPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Download className\
+                  <Download className="h-5 w-5 mr-2 text-blue-600" />
+                  Download Your Data
+                </CardTitle>
+                <CardDescription>
+                  Request a copy of your personal data and learning records
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <p className="text-gray-600">
+                    You can download a portable copy of all data associated with your account, including study history, quiz scores, and certificates.
+                  </p>
+                  <Button variant="outline" className="w-full">
+                    <Download className="h-4 w-4 mr-2" />
+                    Request Data Export
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+      </div>
+    </div>
+  )
+}
+

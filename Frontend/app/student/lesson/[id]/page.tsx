@@ -21,6 +21,31 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 
+interface PracticeProblem {
+  expression: string
+  variables: string[]
+  constants: string[]
+}
+
+interface LessonStep {
+  title: string
+  content: string
+  type: string
+  duration: string
+  example?: string
+  examples?: string[]
+  problems?: PracticeProblem[]
+}
+
+interface LessonData {
+  title: string
+  subject: string
+  duration: string
+  difficulty: string
+  description: string
+  steps: LessonStep[]
+}
+
 export default function LessonPage() {
   const params = useParams()
   const router = useRouter()
@@ -31,7 +56,7 @@ export default function LessonPage() {
   const [isMuted, setIsMuted] = useState(false)
   const [lessonCompleted, setLessonCompleted] = useState(false)
 
-  const lessonData = {
+  const lessonData: Record<number, LessonData> = {
     1: {
       title: "Introduction to Algebra",
       subject: "Mathematics",
